@@ -3,7 +3,7 @@ Public Function Specs() As SpecSuite
     Set Specs = New SpecSuite
     Specs.Description = "VBA-XmlConverter"
     
-    On Error Resume Next
+    'On Error Resume Next
     
     Dim XmlString As String
     Dim XmlObject As Dictionary
