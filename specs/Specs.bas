@@ -29,7 +29,7 @@ Public Function Specs() As SpecSuite
 
         Document.LoadXML XmlString
 
-        .Expect(XmlObject("doctype")("xml")).ToEqual "<!DOCTYPE message [<!ELEMENT message (#PCDATA)>]>"
+        .Expect(XmlObject("doctype")).ToEqual "<!DOCTYPE message [<!ELEMENT message (#PCDATA)>]>"
     End With
     
     With Specs.It("should parse simple element")
@@ -42,26 +42,26 @@ Public Function Specs() As SpecSuite
         .Expect(Document.documentElement.nodeName).ToEqual "messages"
         .Expect(Document.documentElement.childNodes.Length).ToEqual 2
         .Expect(Document.documentElement.childNodes(0).nodeName).ToEqual "message"
-        .Expect(Document.documentElement.childNodes(0).text).ToEqual "Howdy!"
+        .Expect(Document.documentElement.childNodes(0).Text).ToEqual "Howdy!"
         .Expect(Document.documentElement.childNodes(0).attributes(0).nodeName).ToEqual "id"
-        .Expect(Document.documentElement.childNodes(0).attributes(0).text).ToEqual "1"
+        .Expect(Document.documentElement.childNodes(0).attributes(0).Text).ToEqual "1"
         .Expect(Document.documentElement.childNodes(1).nodeName).ToEqual "message"
-        .Expect(Document.documentElement.childNodes(1).text).ToEqual "Howdy 2!"
+        .Expect(Document.documentElement.childNodes(1).Text).ToEqual "Howdy 2!"
         .Expect(Document.documentElement.childNodes(1).attributes(0).nodeName).ToEqual "id"
-        .Expect(Document.documentElement.childNodes(1).attributes(0).text).ToEqual "2"
+        .Expect(Document.documentElement.childNodes(1).attributes(0).Text).ToEqual "2"
 
         .Expect(XmlObject("nodeName")).ToEqual "#document"
         .Expect(XmlObject("childNodes").Count).ToEqual 1
-        .Expect(XmlObject("documentElement")("nodeName")).ToEqual "messages"
-        .Expect(XmlObject("documentElement")("childNodes").Count).ToEqual 2
-        .Expect(XmlObject("documentElement")("childNodes")(1)("nodeName")).ToEqual "message"
-        .Expect(XmlObject("documentElement")("childNodes")(1)("text")).ToEqual "Howdy!"
-        .Expect(XmlObject("documentElement")("childNodes")(1)("attributes")(1)("name")).ToEqual "id"
-        .Expect(XmlObject("documentElement")("childNodes")(1)("attributes")(1)("value")).ToEqual "1"
-        .Expect(XmlObject("documentElement")("childNodes")(2)("nodeName")).ToEqual "message"
-        .Expect(XmlObject("documentElement")("childNodes")(2)("text")).ToEqual "Howdy 2!"
-        .Expect(XmlObject("documentElement")("childNodes")(2)("attributes")(2)("name")).ToEqual "id"
-        .Expect(XmlObject("documentElement")("childNodes")(2)("attributes")(2)("value")).ToEqual "2"
+        .Expect(XmlObject("nodeName")).ToEqual "messages"
+        .Expect(XmlObject("childNodes").Count).ToEqual 2
+        .Expect(XmlObject("childNodes")(1)("nodeName")).ToEqual "message"
+        .Expect(XmlObject("childNodes")(1)("text")).ToEqual "Howdy!"
+        .Expect(XmlObject("childNodes")(1)("attributes")(1)("name")).ToEqual "id"
+        .Expect(XmlObject("childNodes")(1)("attributes")(1)("value")).ToEqual "1"
+        .Expect(XmlObject("childNodes")(2)("nodeName")).ToEqual "message"
+        .Expect(XmlObject("childNodes")(2)("text")).ToEqual "Howdy 2!"
+        .Expect(XmlObject("childNodes")(2)("attributes")(2)("name")).ToEqual "id"
+        .Expect(XmlObject("childNodes")(2)("attributes")(2)("value")).ToEqual "2"
     End With
     
     With Specs.It("should parse advanced XML")
