@@ -7,7 +7,9 @@ Public Function Specs() As SpecSuite
     
     Dim XmlString As String
     Dim XmlObject As Dictionary
-    Dim Document As New DOMDocument
+    'Dim Document As New DOMDocument 'Requires Microsoft XML, v3.0
+    Dim Document As New DOMDocument60 'Requires Microsoft XML, v6.0
+    
     Document.async = False
     
     ' ============================================= '
