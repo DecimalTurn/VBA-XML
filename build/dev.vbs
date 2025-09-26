@@ -29,7 +29,7 @@ SrcFolder = ".\"
 SpecsFolder = ".\specs\"
 
 Dim SpecsWorkbookPath
-SpecsWorkbookPath = ".\specs\VBA-XMLConverter - Specs.xlsm"
+SpecsWorkbookPath = ".\specs\VBA-XML - Specs.xlsm"
 
 Dim Src
 Src = Array( _
