@@ -363,7 +363,7 @@ End Function
 Private Function xml_RootNode(xml_Node As Dictionary) As Dictionary
     Set xml_RootNode = xml_Node
     Do While Not xml_RootNode.Exists("parentNode")
-        Set xml_RootNode = xml_RootNode("parentNode")
+        Set xml_RootNode = xml_RootNode.Items("parentNode")
     Loop
 End Function
 
