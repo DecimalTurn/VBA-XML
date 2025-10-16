@@ -341,7 +341,64 @@ Private Function xml_ParseAttributes(ByRef xml_Node As Dictionary, xml_String As
 End Function
 
 Private Function xml_ParseChildNodes(ByRef xml_Node As Dictionary, xml_String As String, ByRef xml_Index As Long) As Collection
-    ' TODO Set childNodes, text, and other properties on xml_Node
+    Dim xml_ChildNodes As Collection
+    Dim xml_ChildNode As Dictionary
+    Dim xml_TextContent As String
+    Dim xml_StartIndex As Long
+    Dim xml_Char As String
+    Dim xml_StringLength As Long
+    Dim xml_NodeName As String
+    Dim xml_ClosingTag As String
+    
+    Set xml_ChildNodes = xml_Node("childNodes")
+    xml_NodeName = xml_Node("nodeName")
+    xml_ClosingTag = "</" & xml_NodeName & ">"
+    xml_StringLength = Len(xml_String)
+    
+    Do While xml_Index <= xml_StringLength
+        xml_SkipSpaces xml_String, xml_Index
+        
+        If xml_Index > xml_StringLength Then
+            Exit Do
+        End If
+        
+        xml_Char = VBA.Mid$(xml_String, xml_Index, 1)
+        
+        If xml_Char = "<" Then
+            ' Check if this is the closing tag
+            If VBA.Mid$(xml_String, xml_Index, Len(xml_ClosingTag)) = xml_ClosingTag Then
+                ' Found closing tag, skip over it and exit
+                xml_Index = xml_Index + Len(xml_ClosingTag)
+                Exit Do
+            Else
+                ' This is a child element, parse it recursively
+                Set xml_ChildNode = xml_ParseNode(xml_Node, xml_String, xml_Index)
+                xml_ChildNodes.Add xml_ChildNode
+                
+                ' Set firstChild and lastChild references
+                If xml_ChildNodes.Count = 1 Then
+                    Set xml_Node("firstChild") = xml_ChildNode
+                End If
+                Set xml_Node("lastChild") = xml_ChildNode
+            End If
+        Else
+            ' Parse text content until we hit a '<' character
+            xml_StartIndex = xml_Index
+            
+            Do While xml_Index <= xml_StringLength And VBA.Mid$(xml_String, xml_Index, 1) <> "<"
+                xml_Index = xml_Index + 1
+            Loop
+            
+            If xml_Index > xml_StartIndex Then
+                xml_TextContent = xml_TextContent & VBA.Mid$(xml_String, xml_StartIndex, xml_Index - xml_StartIndex)
+            End If
+        End If
+    Loop
+    
+    ' Set the text content (trimmed of leading/trailing spaces)
+    xml_Node("text") = VBA.Trim$(xml_TextContent)
+    
+    Set xml_ParseChildNodes = xml_ChildNodes
 End Function
 
 Private Function xml_IsVoidNode(xml_Node As Dictionary) As Boolean
