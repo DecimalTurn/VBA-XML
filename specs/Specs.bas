@@ -82,6 +82,35 @@ Public Function Specs() As SpecSuite
             "    </ns:Message>" & vbNewLine & _
             "  </ns:Messages>" & vbNewLine & _
             "</ns:Document>"
+        
+        Set XmlObject = XMLConverter.ParseXml(XmlString)
+        
+        ' Test document structure
+        .Expect(XmlObject("nodeName")).ToEqual "#document"
+        .Expect(XmlObject("prolog")).ToEqual "<?xml version=""1.0""?>"
+        
+        ' Test root element (ns:Document)
+        .Expect(XmlObject("childNodes")(1)("nodeName")).ToEqual "ns:Document"
+        .Expect(XmlObject("childNodes")(1)("attributes").Count).ToEqual 3
+        
+        ' Test ns:Document attributes
+        .Expect(XmlObject("childNodes")(1)("attributes")(1)("name")).ToEqual "ns:a"
+        .Expect(XmlObject("childNodes")(1)("attributes")(1)("value")).ToEqual "99503"
+        .Expect(XmlObject("childNodes")(1)("attributes")(2)("name")).ToEqual "ns:b"
+        .Expect(XmlObject("childNodes")(1)("attributes")(2)("value")).ToEqual "1999-10-20"
+        .Expect(XmlObject("childNodes")(1)("attributes")(3)("name")).ToEqual "xmlns:ns"
+        .Expect(XmlObject("childNodes")(1)("attributes")(3)("value")).ToEqual "http://www.testing.com"
+        
+        ' Test that ns:Document has child elements
+        .Expect(XmlObject("childNodes")(1)("childNodes").Count).ToEqual 4
+        
+        ' Test first empty element
+        .Expect(XmlObject("childNodes")(1)("childNodes")(1)("nodeName")).ToEqual "ns:EmptyElement"
+        .Expect(XmlObject("childNodes")(1)("childNodes")(1)("text")).ToEqual ""
+        
+        ' Test ns:Messages element exists
+        .Expect(XmlObject("childNodes")(1)("childNodes")(4)("nodeName")).ToEqual "ns:Messages"
+        .Expect(XmlObject("childNodes")(1)("childNodes")(4)("childNodes").Count).ToEqual 2
     End With
     
     ' ============================================= '
