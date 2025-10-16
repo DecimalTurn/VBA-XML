@@ -240,9 +240,19 @@ Private Function xml_ParseNode(xml_Parent As Dictionary, xml_String As String, B
         Else
             ' 2. Parse attributes
             xml_ParseAttributes xml_ParseNode, xml_String, xml_Index
+            
+            ' After parsing attributes, we need to handle the closing > or />
+            If VBA.Mid$(xml_String, xml_Index, 2) = "/>" Then
+                ' Skip over closing '/>' and exit
+                xml_Index = xml_Index + 2
+                Exit Function
+            ElseIf VBA.Mid$(xml_String, xml_Index, 1) = ">" Then
+                ' Skip over closing '>'
+                xml_Index = xml_Index + 1
+            End If
         End If
         
-        ' If /> Exit Function
+        ' If /> Exit Function (check again after attribute parsing)
         If VBA.Mid$(xml_String, xml_Index, 2) = "/>" Then
             ' Skip over closing '/>' and exit
             xml_Index = xml_Index + 2
@@ -308,13 +318,15 @@ Private Function xml_ParseAttributes(ByRef xml_Node As Dictionary, xml_String As
                     xml_Attributes.Add xml_Attribute
                 Else
                     ' No name was stored, end of attribute name without value
-                    xml_Name = VBA.Mid$(xml_String, xml_StartIndex, xml_Index - xml_StartIndex)
+                    xml_Name = VBA.Trim$(VBA.Mid$(xml_String, xml_StartIndex, xml_Index - xml_StartIndex))
                     
-                    ' Stor ename
-                    Set xml_Attribute = New Dictionary
-                    xml_Attribute.Add "name", xml_Name
-                    ' TODO Set value to ""?
-                    xml_Attributes.Add xml_Attribute
+                    ' Only store attribute if name is not empty
+                    If xml_Name <> "" Then
+                        Set xml_Attribute = New Dictionary
+                        xml_Attribute.Add "name", xml_Name
+                        xml_Attribute.Add "value", ""
+                        xml_Attributes.Add xml_Attribute
+                    End If
                 End If
                 
                 If xml_Char = ">" Or xml_Char = "/" Then
