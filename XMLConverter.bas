@@ -402,8 +402,25 @@ Private Function xml_ParseChildNodes(ByRef xml_Node As Dictionary, xml_String As
 End Function
 
 Private Function xml_IsVoidNode(xml_Node As Dictionary) As Boolean
-    ' xml_HTML5VoidNodeNames
-    ' TODO xml_VoidNode = Check doctype for html: xml_RootNode("doctype")...
+    ' Check if this is an HTML5 void element (self-closing)
+    ' Only apply this check if the document appears to be HTML
+    Dim xml_RootDoc As Dictionary
+    Set xml_RootDoc = xml_RootNode(xml_Node)
+    
+    ' Check if doctype indicates HTML
+    If xml_RootDoc.Exists("doctype") Then
+        Dim xml_Doctype As String
+        xml_Doctype = UCase(xml_RootDoc("doctype"))
+        If InStr(xml_Doctype, "HTML") > 0 Then
+            ' This is HTML, check against void element names
+            Dim xml_NodeName As String
+            xml_NodeName = LCase(xml_Node("nodeName"))
+            xml_IsVoidNode = (InStr("|" & xml_Html5VoidNodeNames & "|", "|" & xml_NodeName & "|") > 0)
+        End If
+    End If
+    
+    ' Default: not a void node
+    xml_IsVoidNode = False
 End Function
 
 Private Function xml_ProcessString(xml_String As String) As String
