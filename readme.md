@@ -11,7 +11,7 @@ Tested in Windows Excel 2013 and Excel for Mac 2011, but should apply to 2007+.
 
 # Example
 
-```VB.net
+```VBA
 Dim XML As Object
 Set XML = XMLConverter.ParseXML( _
   "<?xml version="1.0"?>" & _

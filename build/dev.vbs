@@ -3,7 +3,45 @@
 ' (c) Tim Hall - https://github.com/timhall/VBA-XMLConverter
 '
 ' Development steps for VBA-XMLConverter
+'
+' USAGE:
 ' Run: cscript build/dev.vbs
+'
+' AVAILABLE COMMANDS:
+' The script provides an interactive interface with the following commands:
+'
+' 1. IMPORT COMMANDS:
+'    import [src/specs/all] to [specs/path...]
+'    
+'    Examples:
+'    - import src to specs          (Import XMLConverter.bas to specs workbook)
+'    - import specs to specs        (Import Specs.bas to specs workbook)
+'    - import all to specs          (Import all modules to specs workbook)
+'    - import src to "C:\path\to\workbook.xlsm"  (Import to custom workbook)
+'
+' 2. EXPORT COMMANDS:
+'    export [src/specs/all] from [specs/path...]
+'    
+'    Examples:
+'    - export src from specs        (Export XMLConverter.bas from specs workbook)
+'    - export specs from specs      (Export Specs.bas from specs workbook)
+'    - export all from specs        (Export all modules from specs workbook)
+'    - export src from "C:\path\to\workbook.xlsm"  (Export from custom workbook)
+'
+' 3. RELEASE COMMAND:
+'    release                        (Import all modules to specs workbook)
+'
+' NOTES:
+' - Commands are case-insensitive
+' - Use quotes around file paths that contain spaces
+' - The word "to" or "from" is required and must be the third parameter
+' - Commands must have exactly the right number of parameters (4 parts minimum)
+' - "specs" refers to the default specs workbook: .\specs\VBA-XML - Specs.xlsm
+'
+' COMMON ERRORS:
+' - "Unrecognized action": Check command syntax, ensure proper spacing and parameters
+' - Missing "to" or "from": These keywords are required in the correct position
+' - Wrong parameter count: Commands need exactly 4 space-separated parts (or more for paths with spaces)
 '
 ' @author: tim.hall.engr@gmail.com
 ' @license: MIT (http://www.opensource.org/licenses/mit-license.php)
@@ -29,7 +67,7 @@ SrcFolder = ".\"
 SpecsFolder = ".\specs\"
 
 Dim SpecsWorkbookPath
-SpecsWorkbookPath = ".\specs\VBA-XMLConverter - Specs.xlsm"
+SpecsWorkbookPath = ".\specs\VBA-XML - Specs.xlsm"
 
 Dim Src
 Src = Array( _

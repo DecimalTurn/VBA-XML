@@ -49,13 +49,13 @@ Attribute VB_Name = "XMLConverter"
 #If Mac Then
 #ElseIf VBA7 Then
 
-Private Declare PtrSafe Sub json_CopyMemory Lib "kernel32" Alias "RtlMoveMemory" _
-    (json_MemoryDestination As Any, json_MemorySource As Any, ByVal json_ByteLength As Long)
+Private Declare PtrSafe Sub xml_CopyMemory Lib "kernel32" Alias "RtlMoveMemory" _
+    (xml_MemoryDestination As Any, xml_MemorySource As Any, ByVal xml_ByteLength As Long)
 
 #Else
 
-Private Declare Sub json_CopyMemory Lib "kernel32" Alias "RtlMoveMemory" _
-    (json_MemoryDestination As Any, json_MemorySource As Any, ByVal json_ByteLength As Long)
+Private Declare Sub xml_CopyMemory Lib "kernel32" Alias "RtlMoveMemory" _
+    (xml_MemoryDestination As Any, xml_MemorySource As Any, ByVal xml_ByteLength As Long)
 
 #End If
 
@@ -240,9 +240,19 @@ Private Function xml_ParseNode(xml_Parent As Dictionary, xml_String As String, B
         Else
             ' 2. Parse attributes
             xml_ParseAttributes xml_ParseNode, xml_String, xml_Index
+            
+            ' After parsing attributes, we need to handle the closing > or />
+            If VBA.Mid$(xml_String, xml_Index, 2) = "/>" Then
+                ' Skip over closing '/>' and exit
+                xml_Index = xml_Index + 2
+                Exit Function
+            ElseIf VBA.Mid$(xml_String, xml_Index, 1) = ">" Then
+                ' Skip over closing '>'
+                xml_Index = xml_Index + 1
+            End If
         End If
         
-        ' If /> Exit Function
+        ' If /> Exit Function (check again after attribute parsing)
         If VBA.Mid$(xml_String, xml_Index, 2) = "/>" Then
             ' Skip over closing '/>' and exit
             xml_Index = xml_Index + 2
@@ -308,13 +318,15 @@ Private Function xml_ParseAttributes(ByRef xml_Node As Dictionary, xml_String As
                     xml_Attributes.Add xml_Attribute
                 Else
                     ' No name was stored, end of attribute name without value
-                    xml_Name = VBA.Mid$(xml_String, xml_StartIndex, xml_Index - xml_StartIndex)
+                    xml_Name = VBA.Trim$(VBA.Mid$(xml_String, xml_StartIndex, xml_Index - xml_StartIndex))
                     
-                    ' Stor ename
-                    Set xml_Attribute = New Dictionary
-                    xml_Attribute.Add "name", xml_Name
-                    ' TODO Set value to ""?
-                    xml_Attributes.Add xml_Attribute
+                    ' Only store attribute if name is not empty
+                    If xml_Name <> "" Then
+                        Set xml_Attribute = New Dictionary
+                        xml_Attribute.Add "name", xml_Name
+                        xml_Attribute.Add "value", ""
+                        xml_Attributes.Add xml_Attribute
+                    End If
                 End If
                 
                 If xml_Char = ">" Or xml_Char = "/" Then
@@ -341,12 +353,86 @@ Private Function xml_ParseAttributes(ByRef xml_Node As Dictionary, xml_String As
 End Function
 
 Private Function xml_ParseChildNodes(ByRef xml_Node As Dictionary, xml_String As String, ByRef xml_Index As Long) As Collection
-    ' TODO Set childNodes, text, and other properties on xml_Node
+    Dim xml_ChildNodes As Collection
+    Dim xml_ChildNode As Dictionary
+    Dim xml_TextContent As String
+    Dim xml_StartIndex As Long
+    Dim xml_Char As String
+    Dim xml_StringLength As Long
+    Dim xml_NodeName As String
+    Dim xml_ClosingTag As String
+    
+    Set xml_ChildNodes = xml_Node("childNodes")
+    xml_NodeName = xml_Node("nodeName")
+    xml_ClosingTag = "</" & xml_NodeName & ">"
+    xml_StringLength = Len(xml_String)
+    
+    Do While xml_Index <= xml_StringLength
+        xml_SkipSpaces xml_String, xml_Index
+        
+        If xml_Index > xml_StringLength Then
+            Exit Do
+        End If
+        
+        xml_Char = VBA.Mid$(xml_String, xml_Index, 1)
+        
+        If xml_Char = "<" Then
+            ' Check if this is the closing tag
+            If VBA.Mid$(xml_String, xml_Index, Len(xml_ClosingTag)) = xml_ClosingTag Then
+                ' Found closing tag, skip over it and exit
+                xml_Index = xml_Index + Len(xml_ClosingTag)
+                Exit Do
+            Else
+                ' This is a child element, parse it recursively
+                Set xml_ChildNode = xml_ParseNode(xml_Node, xml_String, xml_Index)
+                xml_ChildNodes.Add xml_ChildNode
+                
+                ' Set firstChild and lastChild references
+                If xml_ChildNodes.Count = 1 Then
+                    Set xml_Node("firstChild") = xml_ChildNode
+                End If
+                Set xml_Node("lastChild") = xml_ChildNode
+            End If
+        Else
+            ' Parse text content until we hit a '<' character
+            xml_StartIndex = xml_Index
+            
+            Do While xml_Index <= xml_StringLength And VBA.Mid$(xml_String, xml_Index, 1) <> "<"
+                xml_Index = xml_Index + 1
+            Loop
+            
+            If xml_Index > xml_StartIndex Then
+                xml_TextContent = xml_TextContent & VBA.Mid$(xml_String, xml_StartIndex, xml_Index - xml_StartIndex)
+            End If
+        End If
+    Loop
+    
+    ' Set the text content (trimmed of leading/trailing spaces)
+    xml_Node("text") = VBA.Trim$(xml_TextContent)
+    
+    Set xml_ParseChildNodes = xml_ChildNodes
 End Function
 
 Private Function xml_IsVoidNode(xml_Node As Dictionary) As Boolean
-    ' xml_HTML5VoidNodeNames
-    ' TODO xml_VoidNode = Check doctype for html: xml_RootNode("doctype")...
+    ' Check if this is an HTML5 void element (self-closing)
+    ' Only apply this check if the document appears to be HTML
+    Dim xml_RootDoc As Dictionary
+    Set xml_RootDoc = xml_RootNode(xml_Node)
+    
+    ' Check if doctype indicates HTML
+    If xml_RootDoc.Exists("doctype") Then
+        Dim xml_Doctype As String
+        xml_Doctype = UCase(xml_RootDoc("doctype"))
+        If InStr(xml_Doctype, "HTML") > 0 Then
+            ' This is HTML, check against void element names
+            Dim xml_NodeName As String
+            xml_NodeName = LCase(xml_Node("nodeName"))
+            xml_IsVoidNode = (InStr("|" & xml_Html5VoidNodeNames & "|", "|" & xml_NodeName & "|") > 0)
+        End If
+    End If
+    
+    ' Default: not a void node
+    xml_IsVoidNode = False
 End Function
 
 Private Function xml_ProcessString(xml_String As String) As String
@@ -363,7 +449,7 @@ End Function
 Private Function xml_RootNode(xml_Node As Dictionary) As Dictionary
     Set xml_RootNode = xml_Node
     Do While Not xml_RootNode.Exists("parentNode")
-        Set xml_RootNode = xml_RootNode("parentNode")
+        Set xml_RootNode = xml_RootNode.Items("parentNode")
     Loop
 End Function
 
