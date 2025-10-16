@@ -52,16 +52,16 @@ Public Function Specs() As SpecSuite
 
         .Expect(XmlObject("nodeName")).ToEqual "#document"
         .Expect(XmlObject("childNodes").Count).ToEqual 1
-        .Expect(XmlObject("nodeName")).ToEqual "messages"
-        .Expect(XmlObject("childNodes").Count).ToEqual 2
-        .Expect(XmlObject("childNodes")(1)("nodeName")).ToEqual "message"
-        .Expect(XmlObject("childNodes")(1)("text")).ToEqual "Howdy!"
-        .Expect(XmlObject("childNodes")(1)("attributes")(1)("name")).ToEqual "id"
-        .Expect(XmlObject("childNodes")(1)("attributes")(1)("value")).ToEqual "1"
-        .Expect(XmlObject("childNodes")(2)("nodeName")).ToEqual "message"
-        .Expect(XmlObject("childNodes")(2)("text")).ToEqual "Howdy 2!"
-        .Expect(XmlObject("childNodes")(2)("attributes")(2)("name")).ToEqual "id"
-        .Expect(XmlObject("childNodes")(2)("attributes")(2)("value")).ToEqual "2"
+        .Expect(XmlObject("childNodes")(1)("nodeName")).ToEqual "messages"
+        .Expect(XmlObject("childNodes")(1)("childNodes").Count).ToEqual 2
+        .Expect(XmlObject("childNodes")(1)("childNodes")(1)("nodeName")).ToEqual "message"
+        .Expect(XmlObject("childNodes")(1)("childNodes")(1)("text")).ToEqual "Howdy!"
+        .Expect(XmlObject("childNodes")(1)("childNodes")(1)("attributes")(1)("name")).ToEqual "id"
+        .Expect(XmlObject("childNodes")(1)("childNodes")(1)("attributes")(1)("value")).ToEqual "1"
+        .Expect(XmlObject("childNodes")(1)("childNodes")(2)("nodeName")).ToEqual "message"
+        .Expect(XmlObject("childNodes")(1)("childNodes")(2)("text")).ToEqual "Howdy 2!"
+        .Expect(XmlObject("childNodes")(1)("childNodes")(2)("attributes")(1)("name")).ToEqual "id"
+        .Expect(XmlObject("childNodes")(1)("childNodes")(2)("attributes")(1)("value")).ToEqual "2"
     End With
     
     With Specs.It("should parse advanced XML")
