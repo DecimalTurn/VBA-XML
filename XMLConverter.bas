@@ -54,8 +54,8 @@ Private Declare PtrSafe Sub xml_CopyMemory Lib "kernel32" Alias "RtlMoveMemory" 
 
 #Else
 
-Private Declare Sub json_CopyMemory Lib "kernel32" Alias "RtlMoveMemory" _
-    (json_MemoryDestination As Any, json_MemorySource As Any, ByVal json_ByteLength As Long)
+Private Declare Sub xml_CopyMemory Lib "kernel32" Alias "RtlMoveMemory" _
+    (xml_MemoryDestination As Any, xml_MemorySource As Any, ByVal xml_ByteLength As Long)
 
 #End If
 
